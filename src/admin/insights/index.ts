@@ -11,7 +11,6 @@ import {
   IS_META_TITLE_CONFIGURED,
   HAS_STATIC_OPTIMIZATION,
   GRID_HOMEPAGE_ENABLED,
-  AI_CONTENT_GENERATION_ENABLED,
   HAS_DEPRECATED_ENV_VARS,
 } from '@/app/config';
 import { PhotoDateRangePostgres } from '@/photo';
@@ -27,7 +26,6 @@ type AdminAppInsightCode = typeof AdminAppInsightCode[number];
 
 const _INSIGHTS_TEMPLATE = [
   'deprecatedEnvVars',
-  'noAi',
   'noRateLimiting',
   'noConfiguredDomain',
   'noConfiguredMetaTitle',
@@ -86,7 +84,6 @@ export const getSignificantInsights = ({
   photosCountNeedSync: number
 }) => {
   const {
-    isAiTextGenerationEnabled,
     hasLocationServices,
     hasRedisStorage,
     hasDomain,
@@ -95,10 +92,7 @@ export const getSignificantInsights = ({
   return {
     deprecatedEnvVars: HAS_DEPRECATED_ENV_VARS,
     forkBehind: Boolean(codeMeta?.isBehind),
-    noRateLimiting: (
-      isAiTextGenerationEnabled ||
-      hasLocationServices
-    ) && !hasRedisStorage,
+    noRateLimiting: hasLocationServices && !hasRedisStorage,
     noConfiguredDomain: !hasDomain,
     photosNeedSync: Boolean(photosCountNeedSync),
   };
@@ -141,7 +135,6 @@ export const getAllInsights = ({
 }) => ({
   ...getSignificantInsights({ codeMeta, photosCountNeedSync }),
   noFork: !codeMeta?.isForkedFromBase && !codeMeta?.isBaseRepo,
-  noAi: !AI_CONTENT_GENERATION_ENABLED,
   noConfiguredMetaTitle: !IS_META_TITLE_CONFIGURED,
   noConfiguredMetaDescription: !IS_META_DESCRIPTION_CONFIGURED,
   photoMatting: photosCountPortrait > 0 && !MATTE_PHOTOS,

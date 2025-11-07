@@ -58,6 +58,9 @@ if (HOSTNAME_MINIO) {
   ));
 }
 
+// Google Drive images (lh3.googleusercontent.com)
+remotePatterns.push(generateRemotePattern('lh3.googleusercontent.com'));
+
 const LOCALE = process.env.NEXT_PUBLIC_LOCALE || 'en-us';
 const LOCALE_ALIAS = './date-fns-locale-alias';
 const LOCALE_DYNAMIC = `i18n/locales/${LOCALE}`;

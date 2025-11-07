@@ -91,55 +91,71 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified,
     })),
     // Years
-    ...years.map(({ year, lastModified }) => ({
-      url: absolutePathForYear(year),
-      priority: PRIORITY_CATEGORY,
-      lastModified,
-    })),
+    ...years
+      .filter(({ year }) => year) // Filter invalid years
+      .map(({ year, lastModified }) => ({
+        url: absolutePathForYear(year),
+        priority: PRIORITY_CATEGORY,
+        lastModified,
+      })),
     // Cameras
-    ...cameras.map(({ camera, lastModified }) => ({
-      url: absolutePathForCamera(camera),
-      priority: PRIORITY_CATEGORY,
-      lastModified,
-    })),
+    ...cameras
+      .filter(({ camera }) => camera?.make && camera?.model) // Filter invalid cameras
+      .map(({ camera, lastModified }) => ({
+        url: absolutePathForCamera(camera),
+        priority: PRIORITY_CATEGORY,
+        lastModified,
+      })),
     // Lenses
-    ...lenses.map(({ lens, lastModified }) => ({
-      url: absolutePathForLens(lens),
-      priority: PRIORITY_CATEGORY,
-      lastModified,
-    })),
+    ...lenses
+      .filter(({ lens }) => lens?.model) // Filter invalid lenses
+      .map(({ lens, lastModified }) => ({
+        url: absolutePathForLens(lens),
+        priority: PRIORITY_CATEGORY,
+        lastModified,
+      })),
     // Albums
-    ...albums.map(({ album, lastModified }) => ({
-      url: absolutePathForAlbum(album),
-      priority: PRIORITY_CATEGORY,
-      lastModified,
-    })),
+    ...albums
+      .filter(({ album }) => album) // Filter invalid albums
+      .map(({ album, lastModified }) => ({
+        url: absolutePathForAlbum(album),
+        priority: PRIORITY_CATEGORY,
+        lastModified,
+      })),
     // Tags
-    ...tags.map(({ tag, lastModified }) => ({
-      url: absolutePathForTag(tag),
-      priority: isTagFavs(tag)
-        ? PRIORITY_CATEGORY_SPECIAL
-        : PRIORITY_CATEGORY,
-      lastModified,
-    })),
+    ...tags
+      .filter(({ tag }) => tag) // Filter invalid tags
+      .map(({ tag, lastModified }) => ({
+        url: absolutePathForTag(tag),
+        priority: isTagFavs(tag)
+          ? PRIORITY_CATEGORY_SPECIAL
+          : PRIORITY_CATEGORY,
+        lastModified,
+      })),
     // Recipes
-    ...recipes.map(({ recipe, lastModified }) => ({
-      url: absolutePathForRecipe(recipe),
-      priority: PRIORITY_CATEGORY,
-      lastModified,
-    })),
+    ...recipes
+      .filter(({ recipe }) => recipe) // Filter invalid recipes
+      .map(({ recipe, lastModified }) => ({
+        url: absolutePathForRecipe(recipe),
+        priority: PRIORITY_CATEGORY,
+        lastModified,
+      })),
     // Films
-    ...films.map(({ film, lastModified }) => ({
-      url: absolutePathForFilm(film),
-      priority: PRIORITY_CATEGORY,
-      lastModified,
-    })),
+    ...films
+      .filter(({ film }) => film) // Filter invalid films
+      .map(({ film, lastModified }) => ({
+        url: absolutePathForFilm(film),
+        priority: PRIORITY_CATEGORY,
+        lastModified,
+      })),
     // Focal Lengths
-    ...focalLengths.map(({ focal, lastModified }) => ({
-      url: absolutePathForFocalLength(focal),
-      priority: PRIORITY_CATEGORY,
-      lastModified,
-    })),
+    ...focalLengths
+      .filter(({ focal }) => focal) // Filter invalid focal lengths
+      .map(({ focal, lastModified }) => ({
+        url: absolutePathForFocalLength(focal),
+        priority: PRIORITY_CATEGORY,
+        lastModified,
+      })),
     // Photos
     ...photos.map(({ id, updatedAt }) => ({
       url: absolutePathForPhoto({ photo: id }),

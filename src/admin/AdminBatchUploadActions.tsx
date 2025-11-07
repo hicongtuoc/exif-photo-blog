@@ -11,7 +11,6 @@ import {
   generateLocalPostgresString,
 } from '@/utility/date';
 import sleep from '@/utility/sleep';
-import { readStreamableValue } from '@ai-sdk/rsc';
 import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useRef, useState } from 'react';
 import { BiCheckCircle } from 'react-icons/bi';
@@ -89,7 +88,8 @@ export default function AdminBatchUploadActions({
         takenAtNaiveLocal: generateLocalNaivePostgresString(),
         shouldRevalidateAllKeysAndPaths: isFinalBatch,
       });
-      for await (const data of readStreamableValue(stream)) {
+      // Process results synchronously instead of streaming
+      for (const data of stream) {
         setButtonText(
           `Adding ${addedUploadCount.current + 1} of ${uploadUrls.length}`,
         );
@@ -110,6 +110,7 @@ export default function AdminBatchUploadActions({
             .length;
           return update;
         });
+        await sleep(10); // Small delay for UI updates
         setAddingProgress((current = 0) => {
           const updatedProgress = (
             (

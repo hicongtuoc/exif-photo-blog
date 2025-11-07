@@ -39,7 +39,7 @@ export default function AdminPhotosTable({
   onLastPhotoVisible?: () => void
   revalidatePhoto?: RevalidatePhoto
   photoIdsSyncing?: string[]
-  hasAiTextGeneration: boolean
+  hasAiTextGeneration?: boolean
   dateType?: 'createdAt' | 'updatedAt'
   canEdit?: boolean
   canDelete?: boolean

@@ -1,4 +1,18 @@
-import { OrientationTypes, type ExifData, ExifTags } from 'ts-exif-parser';
+// EXIF parsing removed - placeholder types and constants
+type ExifData = any;
+type ExifTags = any;
+
+// Placeholder enum for orientation types
+const OrientationTypes = {
+  TOP_LEFT: 1,
+  TOP_RIGHT: 2,
+  BOTTOM_RIGHT: 3,
+  BOTTOM_LEFT: 4,
+  LEFT_TOP: 5,
+  RIGHT_TOP: 6,
+  RIGHT_BOTTOM: 7,
+  LEFT_BOTTOM: 8,
+};
 
 const OFFSET_REGEX = /[+-]\d\d:\d\d/;
 
@@ -21,7 +35,7 @@ export const getOffsetFromExif = (
   Object.values(exifr).find(isValueOffset)
 ) as string | undefined;
 
-export const getAspectRatioFromExif = (data: ExifData): number => {
+export const getAspectRatioFromExif = (data: ExifData): number | undefined => {
   // Using '||' operator to handle `Orientation` unexpectedly being '0'
   const orientation = data.tags?.Orientation || OrientationTypes.TOP_LEFT;
 

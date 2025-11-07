@@ -47,7 +47,7 @@ export default function PhotoPrevNextActions({
   photo?: Photo
   photos?: Photo[]
   className?: string
-  hasAiTextGeneration: boolean
+  hasAiTextGeneration?: boolean
 } & PhotoSetCategory) {
   const { setNextPhotoAnimation, isUserSignedIn } = useAppState();
 

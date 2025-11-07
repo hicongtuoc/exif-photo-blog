@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct URL Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        img { max-width: 400px; margin: 20px; border: 2px solid #ccc; display: block; }
+        .success { border-color: green !important; }
+        .error { border-color: red !important; }
+        .info { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Direct URL Test</h1>
+    <p>Testing if the Google Drive URLs work directly</p>
+
+    <div class="info">
+        <h3>Test URL (from your provided example):</h3>
+        <code>https://lh3.googleusercontent.com/drive-storage/AJQWtBO0u4FVBGMlJvQduZqLPLcyf_T0hdDt4UdBF0dxvPVyhUfF4ymytLovv_rrClMul7rFV_HzEQoSeFamXn5J96Tc6njnLMdpKha_Bq0HcQD1cDU=s190</code>
+    </div>
+
+    <h2>Original URL (s190):</h2>
+    <img 
+        id="img1" 
+        src="https://lh3.googleusercontent.com/drive-storage/AJQWtBO0u4FVBGMlJvQduZqLPLcyf_T0hdDt4UdBF0dxvPVyhUfF4ymytLovv_rrClMul7rFV_HzEQoSeFamXn5J96Tc6njnLMdpKha_Bq0HcQD1cDU=s190" 
+        alt="Test 190"
+        onload="this.className='success'; console.log('Loaded s190')"
+        onerror="this.className='error'; console.error('Failed s190')"
+    >
+    <div id="status1">Loading...</div>
+
+    <h2>Gallery size (s400):</h2>
+    <img 
+        id="img2"
+        src="https://lh3.googleusercontent.com/drive-storage/AJQWtBO0u4FVBGMlJvQduZqLPLcyf_T0hdDt4UdBF0dxvPVyhUfF4ymytLovv_rrClMul7rFV_HzEQoSeFamXn5J96Tc6njnLMdpKha_Bq0HcQD1cDU=s400" 
+        alt="Test 400"
+        onload="this.className='success'; console.log('Loaded s400')"
+        onerror="this.className='error'; console.error('Failed s400')"
+    >
+    <div id="status2">Loading...</div>
+
+    <h2>Detail size (s800):</h2>
+    <img 
+        id="img3"
+        src="https://lh3.googleusercontent.com/drive-storage/AJQWtBO0u4FVBGMlJvQduZqLPLcyf_T0hdDt4UdBF0dxvPVyhUfF4ymytLovv_rrClMul7rFV_HzEQoSeFamXn5J96Tc6njnLMdpKha_Bq0HcQD1cDU=s800" 
+        alt="Test 800"
+        onload="this.className='success'; console.log('Loaded s800')"
+        onerror="this.className='error'; console.error('Failed s800')"
+    >
+    <div id="status3">Loading...</div>
+
+    <h2>Full size (s0):</h2>
+    <img 
+        id="img4"
+        src="https://lh3.googleusercontent.com/drive-storage/AJQWtBO0u4FVBGMlJvQduZqLPLcyf_T0hdDt4UdBF0dxvPVyhUfF4ymytLovv_rrClMul7rFV_HzEQoSeFamXn5J96Tc6njnLMdpKha_Bq0HcQD1cDU=s0" 
+        alt="Test Full"
+        onload="this.className='success'; console.log('Loaded s0')"
+        onerror="this.className='error'; console.error('Failed s0')"
+    >
+    <div id="status4">Loading...</div>
+
+    <script>
+        setTimeout(() => {
+            document.getElementById('status1').textContent = 
+                document.getElementById('img1').complete && document.getElementById('img1').naturalHeight > 0 
+                    ? '✅ Loaded' : '❌ Failed';
+            document.getElementById('status2').textContent = 
+                document.getElementById('img2').complete && document.getElementById('img2').naturalHeight > 0 
+                    ? '✅ Loaded' : '❌ Failed';
+            document.getElementById('status3').textContent = 
+                document.getElementById('img3').complete && document.getElementById('img3').naturalHeight > 0 
+                    ? '✅ Loaded' : '❌ Failed';
+            document.getElementById('status4').textContent = 
+                document.getElementById('img4').complete && document.getElementById('img4').naturalHeight > 0 
+                    ? '✅ Loaded' : '❌ Failed';
+        }, 3000);
+    </script>
+</body>
+</html>

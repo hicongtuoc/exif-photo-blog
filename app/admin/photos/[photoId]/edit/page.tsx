@@ -8,7 +8,6 @@ import {
 import { PATH_ADMIN } from '@/app/path';
 import PhotoEditPageClient from '@/photo/PhotoEditPageClient';
 import {
-  AI_CONTENT_GENERATION_ENABLED,
   BLUR_ENABLED,
   IS_PREVIEW,
 } from '@/app/config';
@@ -46,15 +45,6 @@ export default async function PhotoEditPage({
 
   const photoStorageUrls = await getStorageUrlsForPhoto(photo);
 
-  const hasAiTextGeneration = AI_CONTENT_GENERATION_ENABLED;
-  
-  // Only generate image thumbnails when AI generation is enabled
-  const imageThumbnailBase64 = AI_CONTENT_GENERATION_ENABLED
-    ? await resizeImageFromUrl(
-      getOptimizedPhotoUrlForManipulation(photo.url, IS_PREVIEW),
-    )
-    : '';
-
   const blurData = BLUR_ENABLED
     ? await blurImageFromUrl(
       getOptimizedPhotoUrlForManipulation(photo.url, IS_PREVIEW),
@@ -70,8 +60,6 @@ export default async function PhotoEditPage({
       uniqueTags,
       uniqueRecipes,
       uniqueFilms,
-      hasAiTextGeneration,
-      imageThumbnailBase64,
       blurData,
     }} />
   );

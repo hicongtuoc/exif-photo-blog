@@ -9,7 +9,6 @@ import {
 import PhotoForm from './form/PhotoForm';
 import { Tags } from '@/tag';
 import usePhotoFormParent from './form/usePhotoFormParent';
-import AiButton from './ai/AiButton';
 import { useMemo } from 'react';
 import { Recipes } from '@/recipe';
 import { Films } from '@/film';
@@ -43,7 +42,6 @@ export default function UploadPageClient({
     setUpdatedTitle,
     shouldConfirmAiTextGeneration,
     setShouldConfirmAiTextGeneration,
-    aiContent,
   } = usePhotoFormParent({
     photoForm: formDataFromExif,
     imageThumbnailBase64,
@@ -63,12 +61,6 @@ export default function UploadPageClient({
         ? updatedTitle
         : blobId}
       breadcrumbEllipsis
-      accessory={hasAiTextGeneration &&
-        <AiButton {...{
-          aiContent,
-          shouldConfirm: shouldConfirmAiTextGeneration,
-          tooltip: 'Generate AI text for all fields',
-        }} />}
       isLoading={pending}
     >
       <PhotoForm
@@ -77,7 +69,6 @@ export default function UploadPageClient({
         uniqueTags={uniqueTags}
         uniqueRecipes={uniqueRecipes}
         uniqueFilms={uniqueFilms}
-        aiContent={hasAiTextGeneration ? aiContent : undefined}
         shouldStripGpsData={shouldStripGpsData}
         onTitleChange={setUpdatedTitle}
         onFormStatusChange={setIsPending}

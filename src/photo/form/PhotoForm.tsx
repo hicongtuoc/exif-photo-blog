@@ -31,8 +31,6 @@ import { toastSuccess, toastWarning } from '@/toast';
 import { getDimensionsFromSize } from '@/utility/size';
 import ImageWithFallback from '@/components/image/ImageWithFallback';
 import { Tags, convertTagsForForm } from '@/tag';
-import { AiContent } from '../ai/useAiImageQueries';
-import AiButton from '../ai/AiButton';
 import Spinner from '@/components/Spinner';
 import usePreventNavigation from '@/utility/usePreventNavigation';
 import { useAppState } from '@/app/AppState';
@@ -80,7 +78,6 @@ export default function PhotoForm({
   uniqueTags,
   uniqueRecipes,
   uniqueFilms,
-  aiContent,
   shouldStripGpsData,
   onTitleChange,
   onFormDataChange,
@@ -96,7 +93,6 @@ export default function PhotoForm({
   uniqueTags: Tags
   uniqueRecipes: Recipes
   uniqueFilms: Films
-  aiContent?: AiContent
   shouldStripGpsData?: boolean
   onTitleChange?: (updatedTitle: string) => void
   onFormDataChange?: (formData: Partial<PhotoFormData>) => void,
@@ -134,8 +130,7 @@ export default function PhotoForm({
 
   const canFormBeSubmitted =
     (type === 'create' || formHasChanged) &&
-    isFormValid(formData) &&
-    !aiContent?.isLoading;
+    isFormValid(formData);
 
   // Update form when EXIF data
   // is refreshed by parent
@@ -189,95 +184,27 @@ export default function PhotoForm({
     }
   }, [updatedBlurData]);
 
-  useEffect(() =>
-    setFormData(data => aiContent?.title
-      ? { ...data, title: aiContent?.title }
-      : data),
-  [aiContent?.title]);
-
-  useEffect(() =>
-    setFormData(data => aiContent?.caption
-      ? { ...data, caption: aiContent?.caption }
-      : data),
-  [aiContent?.caption]);
-
-  useEffect(() =>
-    setFormData(data => aiContent?.tags
-      ? { ...data, tags: aiContent?.tags }
-      : data),
-  [aiContent?.tags]);
-
-  useEffect(() =>
-    setFormData(data => aiContent?.semanticDescription
-      ? { ...data, semanticDescription: aiContent?.semanticDescription }
-      : data),
-  [aiContent?.semanticDescription]);
-
   useEffect(() => {
     onFormDataChange?.(formData);
   }, [onFormDataChange, formData]);
 
   const isFieldGeneratingAi = (key: keyof PhotoFormData) => {
-    switch (key) {
-      case 'title':
-        return aiContent?.isLoadingTitle;
-      case 'caption':
-        return aiContent?.isLoadingCaption;
-      case 'tags':
-        return aiContent?.isLoadingTags;
-      case 'semanticDescription':
-        return aiContent?.isLoadingSemantic;
-      default:
-        return false;
-    }
+    return false;
   };
 
   const accessoryForField = (key: keyof PhotoFormData) => {
-    if (aiContent) {
-      switch (key) {
-        case 'title':
-          return <AiButton
-            tabIndex={-1}
-            aiContent={aiContent}
-            requestFields={['title']}
-            shouldConfirm={Boolean(formData.title)}
-            className="h-full"
-          />;
-        case 'caption':
-          return <AiButton
-            tabIndex={-1}
-            aiContent={aiContent}
-            requestFields={['caption']}
-            shouldConfirm={Boolean(formData.caption)}
-            className="h-full"
-          />;
-        case 'tags':
-          return <AiButton
-            tabIndex={-1}
-            aiContent={aiContent}
-            requestFields={['tags']}
-            shouldConfirm={Boolean(formData.tags)}
-            className="h-full"
-          />;
-        case 'semanticDescription':
-          return <AiButton
-            tabIndex={-1}
-            aiContent={aiContent}
-            requestFields={['semantic']}
-            shouldConfirm={Boolean(formData.semanticDescription)}
-          />;
-        case 'blurData':
-          return shouldDebugImageFallbacks && type === 'edit' && formData.url
-            ? <UpdateBlurDataButton
-              photoUrl={getOptimizedPhotoUrlForManipulation(
-                formData.url,
-                IS_PREVIEW,
-              )}
-              onUpdatedBlurData={blurData =>
-                setFormData(data => ({ ...data, blurData }))}
-            />
-            : null;
-      }
+    switch (key) {
+      case 'blurData':
+        return shouldDebugImageFallbacks && type === 'edit' && formData.url
+          ? <UpdateBlurDataButton
+            photoUrl={getOptimizedPhotoUrlForManipulation(
+              formData.url,
+              IS_PREVIEW,
+            )}
+            onUpdatedBlurData={blurData =>
+              setFormData(data => ({ ...data, blurData }))}
+          />
+          : null;
     }
   };
 
@@ -343,7 +270,7 @@ export default function PhotoForm({
       convertTagsForForm(uniqueTags, appText),
       convertRecipesForForm(uniqueRecipes),
       convertFilmsForForm(uniqueFilms, isMakeFujifilm(formData.make)),
-      aiContent !== undefined,
+      false,
       shouldStripGpsData,
     ), [
     uniqueTags,
@@ -351,7 +278,6 @@ export default function PhotoForm({
     uniqueRecipes,
     uniqueFilms,
     formData.make,
-    aiContent,
     shouldStripGpsData,
   ]);
 
@@ -398,7 +324,7 @@ export default function PhotoForm({
           </div>
           <div className={clsx(
             'absolute top-2 left-2 transition-opacity duration-500',
-            aiContent?.isLoading ? 'opacity-100' : 'opacity-0',
+            'opacity-0',
           )}>
             <div className={clsx(
               'leading-none text-xs font-medium uppercase tracking-wide',

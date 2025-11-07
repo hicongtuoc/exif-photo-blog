@@ -104,8 +104,14 @@ export const getOptimizedPhotoUrl = (
     urlBase,
     fileNameBase,
   } = getFileNamePartsFromStorageUrl(args.imageUrl);
+  
+  // For local file system, convert relative URLs to absolute
+  const imageUrl = args.imageUrl.startsWith('/') 
+    ? `http://localhost:${process.env.PORT || 3000}${args.imageUrl}`
+    : args.imageUrl;
+  
   return compatibilityMode
-    ? getNextImageUrlForRequest(args)
+    ? getNextImageUrlForRequest({ ...args, imageUrl })
     : getOptimizedUrl({ urlBase, fileNameBase, suffix });
 };
 

@@ -62,6 +62,11 @@ export const formatCameraText = (
   { make, model: _model }: Camera,
   length: MakeModelTextLength = 'medium',
 ) => {
+  // Handle undefined/null make or model
+  if (!make || !_model) {
+    return make || _model || 'Unknown Camera';
+  }
+  
   // Capture simple make without modifiers like 'Corporation' or 'Company'
   const makeSimple = make.match(/^(\S+)/)?.[1];
   let model = isMakeSony(make) ? formatSonyModel(_model) : _model;

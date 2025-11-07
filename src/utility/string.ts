@@ -24,8 +24,13 @@ export const capitalizeWords = (string = '') =>
 export const parameterize = (
   string: string,
   shouldRemoveNonAlphanumeric?: boolean,
-) =>
-  string
+) => {
+  // Handle undefined/null strings
+  if (!string) {
+    return '';
+  }
+  
+  return string
     .trim()
     // Replace spaces, underscores, slashes, pluses, pipes, dashes with dashes
     .replaceAll(/[\s_–—+&|]/gi, '-')
@@ -40,6 +45,7 @@ export const parameterize = (
       '',
     )
     .toLocaleLowerCase();
+};
 
 export const formatStringForXml = (string: string) =>
   string
@@ -50,7 +56,7 @@ export const formatStringForXml = (string: string) =>
     .replace(/>/g, '&gt;');
 
 export const deparameterize = (string: string) =>
-  capitalizeWords(string.replaceAll('-', ' '));
+  string ? capitalizeWords(string.replaceAll('-', ' ')) : '';
 
 export const formatCount = (count: number) => `× ${count}`;
 

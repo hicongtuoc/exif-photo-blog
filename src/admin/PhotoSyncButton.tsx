@@ -27,7 +27,7 @@ export default function PhotoSyncButton({
   onSyncComplete?: () => void
   updateMode?: boolean
   isSyncingExternal?: boolean
-  hasAiTextGeneration: boolean
+  hasAiTextGeneration?: boolean
   shouldConfirm?: boolean
   shouldToast?: boolean
   shouldScrollIntoViewOnExternalSync?: boolean

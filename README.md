@@ -11,17 +11,13 @@ https://photos.sambecker.com
 ✨&nbsp;&nbsp;Features
 -
 - Built-in auth
-- Photo upload with EXIF extraction
+- Photo upload
 - Organize photos by tag
 - Infinite scroll
 - Light/dark mode
-- Automatic OG image generation
 - CMD-K menu with photo search
-- AI-generated text descriptions
 - RSS/JSON feeds
 - Support for Fujifilm recipes and film simulations
-
-<img src="/readme/og-image-share.png" alt="OG Image Preview" width=600 />
 
 🛠️&nbsp;&nbsp;Installation
 -
@@ -78,32 +74,10 @@ See FAQ for [limitations of local development](#can-i-work-locally-without-acces
 > ⚠️ Enabling may result in increased project usage. See FAQ for static optimization [troubleshooting hints](#why-do-production-deployments-fail-when-static-optimization-is-enabled).
 
 - `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTOS = 1` enables static optimization for photo pages (`p/[photoId]`), i.e., renders pages at build time
-- `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_OG_IMAGES = 1` enables static optimization for OG images, i.e., renders images at build time
 - `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_CATEGORIES = 1` enables static optimization for photo categories (`tag/[tag]`, `shot-on/[make]/[model]`, etc.), i.e., renders pages at build time
-- `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_CATEGORY_OG_IMAGES = 1` enables static optimization for photo category (`tag/[tag]`, `shot-on/[make]/[model]`, etc.) OG images, i.e., renders images at build time
 - `NEXT_PUBLIC_PRESERVE_ORIGINAL_UPLOADS = 1` prevents photo uploads being compressed before storing
 - `NEXT_PUBLIC_IMAGE_QUALITY = 1-100` controls the quality of large photos
 - `NEXT_PUBLIC_BLUR_DISABLED = 1` prevents image blur data being stored and displayed (potentially useful for limiting Postgres usage)
-
-### AI text generation
-
-To auto-generate text descriptions of photo:
-
-1. Setup OpenAI
-   - Create [OpenAI](https://openai.com) account and fund it ([see thread](https://github.com/sambecker/exif-photo-blog/issues/110) if you're having issues)
-   - Setup usage limits to avoid unexpected charges (_recommended_)
-   - Set `OPENAI_BASE_URL` in order to use alternate OpenAI-compatible providers (experimental)
-2. Generate API key and store in environment variable `OPENAI_SECRET_KEY` (enable Responses API write access if customizing permissions)
-3. Add [rate limiting](#rate-limiting) (_recommended_)
-4. Configure auto-generated fields (optional)
-   - Set which text fields auto-generate when uploading a photo by storing a comma-separated list, e.g., `AI_TEXT_AUTO_GENERATED_FIELDS = title,semantic`
-   - Accepted values:
-     - `all`
-     - `title` (default)
-     - `caption`
-     - `tags` (default)
-     - `semantic` (default)
-     - `none`
 
 ### Location services
 
@@ -160,7 +134,7 @@ Create Upstash Redis store from storage tab of Vercel dashboard and link to your
 
 ### Display
 - `NEXT_PUBLIC_HIDE_KEYBOARD_SHORTCUT_TOOLTIPS = 1` hides keyboard shortcut hints in areas like the main nav, and previous/next photo links
-- `NEXT_PUBLIC_HIDE_EXIF_DATA = 1` hides EXIF data in photo details and OG images (potentially useful for portfolios, which don't focus on photography)
+- `NEXT_PUBLIC_HIDE_EXIF_DATA = 1` hides EXIF data in photo details (potentially useful for portfolios, which don't focus on photography)
 - `NEXT_PUBLIC_HIDE_ZOOM_CONTROLS = 1` hides fullscreen photo zoom controls
 - `NEXT_PUBLIC_HIDE_TAKEN_AT_TIME = 1` hides taken at time from photo meta
 - `NEXT_PUBLIC_HIDE_REPO_LINK = 1` removes footer link to repo
@@ -177,7 +151,7 @@ Create Upstash Redis store from storage tab of Vercel dashboard and link to your
 ### Settings
 - `NEXT_PUBLIC_GEO_PRIVACY = 1` disables collection/display of location-based data (⚠️ re-compresses uploaded images in order to remove GPS information)
 - `NEXT_PUBLIC_ALLOW_PUBLIC_DOWNLOADS = 1` enables public photo downloads for all visitors (⚠️ may result in increased bandwidth usage)
-- `NEXT_PUBLIC_SOCIAL_NETWORKS`
+  - `NEXT_PUBLIC_SOCIAL_NETWORKS`
   - Comma-separated list of social networks to show in share modal
   - Accepted values:
     - `x` (default)
@@ -186,10 +160,7 @@ Create Upstash Redis store from storage tab of Vercel dashboard and link to your
     - `linkedin`
     - `all`
     - `none`
-- `NEXT_PUBLIC_SITE_FEEDS = 1` enables feeds at `/feed.json` and `/rss.xml`
-- `NEXT_PUBLIC_OG_TEXT_ALIGNMENT = BOTTOM` keeps OG image text bottom aligned (default is top)
-
-### Scripts & Analytics
+- `NEXT_PUBLIC_SITE_FEEDS = 1` enables feeds at `/feed.json` and `/rss.xml`### Scripts & Analytics
 - Web Analytics
   1. Open project on Vercel
   2. Click "Analytics" tab
@@ -420,10 +391,7 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 > There have been reports ([#184](https://github.com/sambecker/exif-photo-blog/issues/184#issuecomment-2629474045) + [#185](https://github.com/sambecker/exif-photo-blog/issues/185#issuecomment-2629478570)) that having large photos (over 30MB), or a CDN, e.g., Cloudflare in front of Vercel, may destabilize static optimization.
 
 #### Why don't my older photos look right?
-> As the template has evolved, EXIF fields (such as lenses) have been added, blur data is generated through a different method, and AI/privacy features have been added. In order to bring older photos up to date, either click the 'sync' button next to a photo or go to photo updates (`/admin/photos/updates`) to sync all photos that need updates.
-
-#### Why don't my OG images load when I share a link?
-> Many services such as iMessage, Slack, and X, require near-instant responses when unfurling link-based content. In order to guarantee sufficient responsiveness, consider rendering pages and image assets ahead of time by enabling static optimization by setting `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTOS = 1` and `NEXT_PUBLIC_STATICALLY_OPTIMIZE_PHOTO_OG_IMAGES = 1`. Keep in mind that this will increase platform usage.
+> As the template has evolved, EXIF fields (such as lenses) have been added, and blur data is generated through a different method. In order to bring older photos up to date, either click the 'sync' button next to a photo or go to photo updates (`/admin/photos/updates`) to sync all photos that need updates.
 
 #### Why do vertical images take up so much space?
 > By default, all photos are shown full-width, regardless of orientation. Enable matting to showcase horizontal and vertical photos at similar scales by setting `NEXT_PUBLIC_MATTE_PHOTOS = 1`.
@@ -463,12 +431,6 @@ Thank you ❤️ translators: [@sconetto](https://github.com/sconetto) (`pt-br`,
 
 #### Why are large, multi-photo uploads not finishing?
 > The default timeout for processing multiple uploads is 60 seconds (the limit for Hobby accounts). This can be extended to 5 minutes on Pro accounts by setting `maxDuration = 300` in `src/app/admin/uploads/page.tsx`.
-
-#### I've added my OpenAI key but can't seem to make it work. Why am I seeing connection errors?
-> You may need to pre-purchase credits before accessing the OpenAI API. See [#110](https://github.com/sambecker/exif-photo-blog/issues/110) for discussion. If you've customized key permissions, make sure write access to the Responses API is enabled.
-
-#### How do I generate AI text for preexisting photos?
-> Once AI text generation is configured, photos missing text will show up in photo updates (`/admin/photos/updates`).
 
 #### Will there be support for image storage providers beyond Vercel, AWS, Cloudflare, and MinIO?
 > At this time, there are no plans to introduce support for new storage providers. The template now supports Vercel Blob, AWS S3, Cloudflare R2, and MinIO (self-hosted S3-compatible storage). While configuring other AWS-compatible providers should not be too difficult, there's nuance to consider surrounding details like IAM, CORS, and domain configuration, which can differ slightly from platform to platform. If you'd like to contribute an implementation for a new storage provider, please open a PR.

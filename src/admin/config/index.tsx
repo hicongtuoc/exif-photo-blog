@@ -32,11 +32,6 @@ const ADMIN_CONFIG_SECTIONS = [{
   required: false,
   icon: <BiGlobe size={16} className="translate-y-[1px]" />,
 }, {
-  title: 'AI Text',
-  titleShort: 'AI',
-  required: false,
-  icon: <HiSparkles size={14} />,
-}, {
   title: 'Performance',
   required: false,
   icon: <RiSpeedMiniLine size={19} className="translate-y-[1px]" />,

@@ -36,7 +36,7 @@ export default function AdminPhotosClient({
   photosCountNeedsSync: number
   blobPhotoUrls: StorageListResponse
   shouldResize: boolean
-  hasAiTextGeneration: boolean
+  hasAiTextGeneration?: boolean
   onLastUpload: () => Promise<void>
   infiniteScrollInitial: number
   infiniteScrollMultiple: number

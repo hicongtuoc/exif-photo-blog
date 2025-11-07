@@ -12,7 +12,11 @@ import { GEO_PRIVACY_ENABLED } from '@/app/config';
 import { PhotoExif } from '..';
 import { FujifilmRecipe } from '@/platforms/fujifilm/recipe';
 import { FujifilmSimulation } from '@/platforms/fujifilm/simulation';
-import type { ExifData, ExifTags } from 'ts-exif-parser';
+// EXIF types removed - manual entry only
+// import type { ExifData, ExifTags } from 'ts-exif-parser';
+
+type ExifData = any; // Placeholder since EXIF parsing is removed
+type ExifTags = any;
 
 export const convertExifToFormData = (
   exif: ExifData,
@@ -43,7 +47,7 @@ export const convertExifToFormData = (
   const dateTimeOriginal = getExifValue('DateTimeOriginal');
 
   return {
-    aspectRatio: getAspectRatioFromExif(exif).toString(),
+    aspectRatio: getAspectRatioFromExif(exif)?.toString(),
     make: getExifValue('Make'),
     model: getExifValue('Model'),
     focalLength: getExifValue('FocalLength')?.toString(),

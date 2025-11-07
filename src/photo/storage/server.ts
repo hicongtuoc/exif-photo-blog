@@ -44,7 +44,7 @@ export const convertUploadToPhoto = async ({
   if (shouldStripGpsData) {
     const fileWithoutGps = await removeGpsData(fileBytes);
     promise = putFile(fileWithoutGps, fileName)
-      .then(async url => {
+      .then(async (url: string) => {
         if (url && shouldDeleteOrigin) { await deleteFile(uploadUrl); }
         return url;
       });

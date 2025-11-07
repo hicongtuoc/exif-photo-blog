@@ -9,7 +9,6 @@ import {
 } from './form';
 import PhotoForm from './form/PhotoForm';
 import { Tags } from '@/tag';
-import AiButton from './ai/AiButton';
 import usePhotoFormParent from './form/usePhotoFormParent';
 import ExifCaptureButton from '@/admin/ExifCaptureButton';
 import { useState } from 'react';
@@ -26,7 +25,6 @@ export default function PhotoEditPageClient({
   uniqueTags,
   uniqueRecipes,
   uniqueFilms,
-  hasAiTextGeneration,
   imageThumbnailBase64,
   blurData,
 }: {
@@ -37,8 +35,7 @@ export default function PhotoEditPageClient({
   uniqueTags: Tags
   uniqueRecipes: Recipes
   uniqueFilms: Films
-  hasAiTextGeneration: boolean
-  imageThumbnailBase64: string
+  imageThumbnailBase64?: string
   blurData: string
 }) {
   const photoForm = convertPhotoToFormData(photo);
@@ -50,7 +47,6 @@ export default function PhotoEditPageClient({
     setUpdatedTitle,
     shouldConfirmAiTextGeneration,
     setShouldConfirmAiTextGeneration,
-    aiContent,
   } = usePhotoFormParent({
     photoForm,
     imageThumbnailBase64,
@@ -69,12 +65,6 @@ export default function PhotoEditPageClient({
       breadcrumbEllipsis
       accessory={
         <div className="flex gap-2">
-          {hasAiTextGeneration &&
-            <AiButton {...{
-              aiContent,
-              shouldConfirm: shouldConfirmAiTextGeneration,
-              tooltip: 'Generate AI text for all fields',
-            }} />}
           <ExifCaptureButton
             photoUrl={photo.url}
             onSync={setUpdatedExifData}
@@ -93,7 +83,6 @@ export default function PhotoEditPageClient({
         uniqueTags={uniqueTags}
         uniqueRecipes={uniqueRecipes}
         uniqueFilms={uniqueFilms}
-        aiContent={hasAiTextGeneration ? aiContent : undefined}
         onTitleChange={setUpdatedTitle}
         onFormStatusChange={setIsPending}
         onFormDataChange={setShouldConfirmAiTextGeneration}

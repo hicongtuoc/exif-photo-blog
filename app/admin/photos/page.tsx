@@ -6,7 +6,6 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { TIMEZONE_COOKIE_NAME } from '@/utility/timezone';
 import {
-  AI_CONTENT_GENERATION_ENABLED,
   PRESERVE_ORIGINAL_UPLOADS,
 } from '@/app/config';
 
@@ -47,7 +46,6 @@ export default async function AdminPhotosPage() {
       photosCount,
       photosCountNeedsSync,
       shouldResize: !PRESERVE_ORIGINAL_UPLOADS,
-      hasAiTextGeneration: AI_CONTENT_GENERATION_ENABLED,
       onLastUpload: async () => {
         'use server';
         // Update upload count in admin nav

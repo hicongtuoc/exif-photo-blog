@@ -50,15 +50,9 @@ import {
 import { TAG_FAVS, Tags, isPhotoFav, isTagFavs } from '@/tag';
 import { convertPhotoToPhotoDbInsert, Photo } from '.';
 import { runAuthenticatedAdminServerAction } from '@/auth/server';
-import { AiImageQuery, getAiImageQuery, getAiTextFieldsToGenerate } from './ai';
-import { streamOpenAiImageQuery } from '@/platforms/openai';
 import {
-  AI_TEXT_AUTO_GENERATED_FIELDS,
-  AI_CONTENT_GENERATION_ENABLED,
   BLUR_ENABLED,
 } from '@/app/config';
-import { generateAiImageQueries } from './ai/server';
-import { createStreamableValue } from '@ai-sdk/rsc';
 import { convertUploadToPhoto } from './storage/server';
 import { UrlAddStatus } from '@/admin/AdminUploadsClient';
 import { convertStringToArray } from '@/utility/string';
@@ -145,46 +139,22 @@ const addUpload = async ({
   } = await extractImageDataFromBlobPath(url, {
     includeInitialPhotoFields: true,
     generateBlurData: BLUR_ENABLED,
-    generateResizedImage: AI_CONTENT_GENERATION_ENABLED,
+    generateResizedImage: false,
   });
 
   if (formDataFromExif) {
-    if (AI_CONTENT_GENERATION_ENABLED) {
-      onStreamUpdate?.('Generating AI text');
-    }
-
     const title = _title || formDataFromExif.title;
     const caption = formDataFromExif.caption;
     const tags = _tags || formDataFromExif.tags;
 
-    const uniqueTags = _uniqueTags || await getUniqueTags();
-
-    const {
-      title: aiTitle,
-      caption: aiCaption,
-      tags: aiTags,
-      semantic,
-    } = await generateAiImageQueries({
-      imageBase64: imageResizedBase64,
-      textFieldsToGenerate: getAiTextFieldsToGenerate(
-        AI_TEXT_AUTO_GENERATED_FIELDS,
-        Boolean(title),
-        Boolean(caption),
-        Boolean(tags),
-      ),
-      existingTitle: title,
-      uniqueTags,
-    });
-
     const form: Partial<PhotoFormData> = {
       ...formDataFromExif,
-      title: title || aiTitle,
-      caption: caption || aiCaption,
-      tags: tags || aiTags,
+      title,
+      caption,
+      tags,
       excludeFromFeeds,
       hidden,
       favorite,
-      semanticDescription: semantic,
       takenAt: formDataFromExif.takenAt || takenAtLocal,
       takenAtNaive: formDataFromExif.takenAtNaive || takenAtNaiveLocal,
     };
@@ -240,24 +210,24 @@ export const addUploadsAction = async ({
   albumTitles?: string[]
 }) =>
   runAuthenticatedAdminServerAction(async () => {
-    const PROGRESS_TASK_COUNT = AI_CONTENT_GENERATION_ENABLED ? 5 : 4;
+    const PROGRESS_TASK_COUNT = 4;
 
     const addedUploadUrls: string[] = [];
+    const results: Array<Omit<UrlAddStatus, 'fileName'>> = [];
     let currentUploadUrl = '';
     let progress = 0;
-
-    const stream = createStreamableValue<Omit<UrlAddStatus, 'fileName'>>();
 
     const streamUpdate = (
       statusMessage: string,
       status: UrlAddStatus['status'] = 'adding',
-    ) =>
-      stream.update({
+    ) => {
+      results.push({
         url: currentUploadUrl,
         status,
         statusMessage,
         progress: ++progress / PROGRESS_TASK_COUNT,
       });
+    };
 
     const uniqueTags = await getUniqueTags();
 
@@ -265,43 +235,41 @@ export const addUploadsAction = async ({
       ? await createAlbumsAndGetIds(albumTitles)
       : [];
 
-    (async () => {
-      try {
-        for (const [index, url] of uploadUrls.entries()) {
-          currentUploadUrl = url;
-          progress = 0;
-          const title = uploadTitles[index];
-          streamUpdate('Parsing EXIF data');
+    try {
+      for (const [index, url] of uploadUrls.entries()) {
+        currentUploadUrl = url;
+        progress = 0;
+        const title = uploadTitles[index];
+        streamUpdate('Parsing EXIF data');
 
-          await addUpload({
-            url,
-            title,
-            albumIds,
-            tags,
-            favorite,
-            hidden,
-            excludeFromFeeds,
-            takenAtLocal,
-            takenAtNaiveLocal,
-            uniqueTags,
-            onStreamUpdate: streamUpdate,
-            onFinish: () => {
-              addedUploadUrls.push(url);
-            },
-          });
-        };
-      } catch (error: any) {
-        // eslint-disable-next-line max-len
-        stream.error(`${error.message} (${addedUploadUrls.length} of ${uploadUrls.length} photos successfully added)`);
-      }
-      stream.done();
-    })();
+        await addUpload({
+          url,
+          title,
+          albumIds,
+          tags,
+          favorite,
+          hidden,
+          excludeFromFeeds,
+          takenAtLocal,
+          takenAtNaiveLocal,
+          uniqueTags,
+          onStreamUpdate: streamUpdate,
+          onFinish: () => {
+            addedUploadUrls.push(url);
+          },
+        });
+      };
+    } catch (error: any) {
+      throw new Error(
+        `${error.message} (${addedUploadUrls.length} of ${uploadUrls.length} photos successfully added)`
+      );
+    }
 
     if (shouldRevalidateAllKeysAndPaths) {
       after(revalidateAllKeysAndPaths);
     }
 
-    return stream.value;
+    return results;
   });
 
 export const updatePhotoAction = async (formData: FormData) =>
@@ -563,7 +531,7 @@ export const syncPhotoAction = async (
       } = await extractImageDataFromBlobPath(photo.url, {
         includeInitialPhotoFields: false,
         generateBlurData: BLUR_ENABLED,
-        generateResizedImage: AI_CONTENT_GENERATION_ENABLED,
+        generateResizedImage: false,
         // If in update mode, only update color fields if necessary
         updateColorFields: !(
           updateMode &&
@@ -591,18 +559,6 @@ export const syncPhotoAction = async (
           }
         }
 
-        const {
-          title: atTitle,
-          caption: aiCaption,
-          tags: aiTags,
-          semantic: aiSemanticDescription,
-        } = await generateAiImageQueries({
-          imageBase64: imageResizedBase64,
-          textFieldsToGenerate: photo.updateStatus?.isMissingAiTextFields ?? [],
-          isBatch,
-          uniqueTags,
-        });
-
         const formDataFromPhoto = convertPhotoToFormData(photo);
 
         // Don't overwrite manually configured meta with null data
@@ -617,11 +573,6 @@ export const syncPhotoAction = async (
             ...formDataFromPhoto,
             ...formDataFromExif,
             ...!BLUR_ENABLED && { blurData: undefined },
-            ...!photo.title && { title: atTitle },
-            ...!photo.caption && { caption: aiCaption },
-            ...photo.tags.length === 0 && { tags: aiTags },
-            ...!photo.semanticDescription &&
-              { semanticDescription: aiSemanticDescription },
           });
 
         await updatePhoto(photoFormDbInsert)
@@ -649,19 +600,6 @@ export const syncPhotosAction = async (photosToSync: {
 
 export const clearCacheAction = async () =>
   runAuthenticatedAdminServerAction(revalidateAllKeysAndPaths);
-
-export const streamAiImageQueryAction = async (
-  imageBase64: string,
-  query: AiImageQuery,
-  existingTitle?: string,
-) =>
-  runAuthenticatedAdminServerAction(async () => {
-    const existingTags = await getUniqueTags();
-    return streamOpenAiImageQuery(
-      imageBase64,
-      getAiImageQuery(query, existingTitle, existingTags),
-    );
-  });
 
 export const getImageBlurAction = async (url: string) =>
   runAuthenticatedAdminServerAction(() => blurImageFromUrl(url));

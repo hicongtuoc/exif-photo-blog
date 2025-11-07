@@ -2,7 +2,8 @@
 // - github.com/exiftool/exiftool/blob/master/lib/Image/ExifTool/FujiFilm.pm
 // - exiftool.org/TagNames/FujiFilm.html
 
-import type { ExifData } from 'ts-exif-parser';
+// EXIF parsing removed - placeholder type
+type ExifData = any;
 import { MAKE_FUJIFILM } from '.';
 
 // Makernote Offsets

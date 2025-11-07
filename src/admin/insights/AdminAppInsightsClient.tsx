@@ -143,7 +143,6 @@ export default function AdminAppInsightsClient({
     deprecatedEnvVars,
     noFork,
     forkBehind,
-    noAi,
     noRateLimiting,
     noConfiguredDomain,
     noConfiguredMetaTitle,
@@ -427,22 +426,6 @@ export default function AdminAppInsightsClient({
                     See {readmeAnchor('performance')} for cost implications.
                   </span>
                 </div>
-              </>}
-            />}
-            {(noAi || debug) && <ScoreCardRow
-              icon={<TbSparkles size={17} />}
-              content="Improve SEO + accessibility with AI"
-              expandContent={<>
-                Enable automatic AI text generation
-                {' '}
-                by setting <EnvVar
-                  variable="OPENAI_SECRET_KEY"
-                  trailingContent="."
-                />
-                {' '}
-                Further instruction and cost considerations in
-                {' '}
-                {readmeAnchor('ai-text-generation')}.
               </>}
             />}
             {(photoMatting || debug) && <ScoreCardRow

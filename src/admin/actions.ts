@@ -2,8 +2,7 @@
 
 import { runAuthenticatedAdminServerAction } from '@/auth/server';
 import { testRedisConnection } from '@/platforms/redis';
-import { testOpenAiConnection } from '@/platforms/openai';
-import { testDatabaseConnection } from '@/platforms/postgres';
+import { testDatabaseConnection } from '@/platforms/json-db';
 import { testStorageConnection } from '@/platforms/storage';
 import { testGooglePlacesConnection } from '@/platforms/google-places';
 import { APP_CONFIGURATION } from '@/app/config';
@@ -101,20 +100,17 @@ export const testConnectionsAction = async () =>
       hasStorageProvider,
       hasRedisStorage,
       hasLocationServices,
-      isAiTextGenerationEnabled,
     } = APP_CONFIGURATION;
 
     const [
       databaseError,
       storageError,
       redisError,
-      aiError,
       locationError,
     ] = await Promise.all([
       scanForError(hasDatabase, testDatabaseConnection),
       scanForError(hasStorageProvider, testStorageConnection),
       scanForError(hasRedisStorage, testRedisConnection),
-      scanForError(isAiTextGenerationEnabled, testOpenAiConnection),
       scanForError(hasLocationServices, testGooglePlacesConnection),
     ]);
 
@@ -122,7 +118,6 @@ export const testConnectionsAction = async () =>
       databaseError,
       storageError,
       redisError,
-      aiError,
       locationError,
     };
   });

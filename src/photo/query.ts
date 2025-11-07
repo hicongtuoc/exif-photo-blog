@@ -2,7 +2,7 @@
 import {
   sql,
   query,
-} from '@/platforms/postgres';
+} from '@/platforms/json-db';
 import { convertArrayToPostgresString } from '@/db';
 import {
   PhotoDb,
@@ -16,8 +16,6 @@ import { Cameras, createCameraKey } from '@/camera';
 import { Tags } from '@/tag';
 import { Films } from '@/film';
 import {
-  AI_TEXT_AUTO_GENERATED_FIELDS,
-  AI_CONTENT_GENERATION_ENABLED,
   COLOR_SORT_ENABLED,
 } from '@/app/config';
 import {
@@ -554,19 +552,6 @@ const outdatedWhereValues = [
   OUTDATED_UPDATE_AT_THRESHOLD.toISOString(),
 ];
 
-const needsAiTextWhereClauses =
-  AI_CONTENT_GENERATION_ENABLED
-    ? AI_TEXT_AUTO_GENERATED_FIELDS
-      .map(field => {
-        switch (field) {
-          case 'title': return `(title <> '') IS NOT TRUE`;
-          case 'caption': return `(caption <> '') IS NOT TRUE`;
-          case 'tags': return `(tags IS NULL OR array_length(tags, 1) = 0)`;
-          case 'semantic': return `(semantic_description <> '') IS NOT TRUE`;
-        }
-      })
-    : [];
-
 const needsColorDataWhereClauses = COLOR_SORT_ENABLED
   ? [`(
     color_data IS NULL OR
@@ -577,7 +562,6 @@ const needsColorDataWhereClauses = COLOR_SORT_ENABLED
 const needsSyncWhereStatement =
   `WHERE ${[
     ...outdatedWhereClauses,
-    ...needsAiTextWhereClauses,
     ...needsColorDataWhereClauses,
   ].join(' OR ')}`;
 

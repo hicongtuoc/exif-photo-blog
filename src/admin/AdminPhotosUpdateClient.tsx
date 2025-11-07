@@ -25,7 +25,7 @@ export default function AdminPhotosUpdateClient({
   hasAiTextGeneration,
 }: {
   photos: Photo[]
-  hasAiTextGeneration: boolean
+  hasAiTextGeneration?: boolean
 }) {
   // Use refs for non-reactive while loop state
   const photoIdsToSync = useRef(photos.map(photo => photo.id));

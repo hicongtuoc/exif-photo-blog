@@ -7,7 +7,8 @@ import {
   FujifilmSimulation,
   getFujifilmSimulationFromMakerNote,
 } from '@/platforms/fujifilm/simulation';
-import { ExifData, ExifParserFactory } from 'ts-exif-parser';
+// EXIF parsing removed - manual input only
+// import { ExifData, ExifParserFactory } from 'ts-exif-parser';
 import { PhotoFormData } from './form';
 import sharp, { Sharp } from 'sharp';
 import {
@@ -27,7 +28,6 @@ import {
 import { PhotoDbInsert } from '.';
 import { convertExifToFormData } from './form/server';
 import { getColorFieldsForPhotoForm } from './color/server';
-import exifr from 'exifr';
 import { getCompatibleExifValue } from '@/utility/exif';
 
 const IMAGE_WIDTH_BLUR = 200;
@@ -61,45 +61,26 @@ export const extractImageDataFromBlobPath = async (
     fileId: blobId,
   } = getFileNamePartsFromStorageUrl(url);
 
-  let dataExif: ExifData | undefined;
-  let dataExifr: any | undefined;
-  let film: FujifilmSimulation | undefined;
-  let recipe: FujifilmRecipe | undefined;
+  // EXIF parsing removed - users must enter data manually
   let blurData: string | undefined;
   let imageResizedBase64: string | undefined;
-  let shouldStripGpsData = false;
   let error: string | undefined;
 
+  // For local file system, convert relative path to absolute URL
+  const fetchUrl = url.startsWith('/') 
+    ? `http://localhost:${process.env.PORT || 3000}${url}`
+    : url;
+
   const fileBytes = blobPath
-    ? await fetch(url, { cache: 'no-store' }).then(res => res.arrayBuffer())
+    ? await fetch(fetchUrl, { cache: 'no-store' }).then(res => res.arrayBuffer())
       .catch(e => {
-        error = `Error fetching image from ${url}: "${e.message}"`;
+        error = `Error fetching image from ${fetchUrl}: "${e.message}"`;
         return undefined;
       })
     : undefined;
 
   try {
     if (fileBytes) {
-      const parser = ExifParserFactory.create(Buffer.from(fileBytes));
-
-      // Data for form
-      parser.enableBinaryFields(false);
-      dataExif = parser.parse();
-      dataExifr = await exifr.parse(fileBytes, { xmp: true });
-
-      // Capture film simulation for Fujifilm cameras
-      if (isExifForFujifilm(dataExif)) {
-        // Parse exif data again with binary fields
-        // in order to access MakerNote tag
-        parser.enableBinaryFields(true);
-        const exifDataBinary = parser.parse();
-        const makerNote = exifDataBinary.tags?.MakerNote;
-        if (Buffer.isBuffer(makerNote)) {
-          film = getFujifilmSimulationFromMakerNote(makerNote);
-          recipe = getFujifilmRecipeFromMakerNote(makerNote);
-        }
-      }
-
       if (generateBlurData) {
         blurData = await blurImage(fileBytes);
       }
@@ -107,39 +88,31 @@ export const extractImageDataFromBlobPath = async (
       if (generateResizedImage) {
         imageResizedBase64 = await resizeImage(fileBytes);
       }
-
-      shouldStripGpsData = GEO_PRIVACY_ENABLED && (
-        Boolean(getCompatibleExifValue('GPSLatitude', dataExif, dataExifr)) ||
-        Boolean(getCompatibleExifValue('GPSLongitude', dataExif, dataExifr))
-      );
     }
   } catch (e) {
-    error = `Error extracting image data from ${url}: "${e}"`;
+    error = `Error processing image from ${fetchUrl}: "${e}"`;
   }
 
   if (error) { console.log(error); }
 
   const colorFields = updateColorFields
-    ? await getColorFieldsForPhotoForm(url)
+    ? await getColorFieldsForPhotoForm(fetchUrl)
     : undefined;
 
   return {
     blobId,
-    ...dataExif && {
-      formDataFromExif: {
-        ...includeInitialPhotoFields && {
-          hidden: 'false',
-          favorite: 'false',
-          extension,
-          url,
-        },
-        ...generateBlurData && { blurData },
-        ...convertExifToFormData(dataExif, dataExifr, film, recipe),
-        ...colorFields,
+    formDataFromExif: {
+      ...includeInitialPhotoFields && {
+        hidden: 'false',
+        favorite: 'false',
+        extension,
+        url,
       },
+      ...generateBlurData && { blurData },
+      ...colorFields,
     },
     imageResizedBase64,
-    shouldStripGpsData,
+    shouldStripGpsData: false,
     fileBytes,
     error,
   };

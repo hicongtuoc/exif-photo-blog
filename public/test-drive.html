@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Test - Google Drive API</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        #result { margin-top: 20px; white-space: pre-wrap; }
+        img { max-width: 300px; margin: 10px; border: 2px solid #ccc; }
+        .image-container { display: inline-block; margin: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Google Drive API Test</h1>
+    <button onclick="testAPI()">Fetch Images</button>
+    <div id="result"></div>
+    <div id="images"></div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            const imagesDiv = document.getElementById('images');
+            
+            resultDiv.textContent = 'Loading...';
+            imagesDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/google-drive?folderId=1Twox6YsD_VyH_mHCivskyEtlAUK_uYna');
+                const data = await response.json();
+                
+                console.log('API Response:', data);
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.images && data.images.length > 0) {
+                    console.log('Processing', data.images.length, 'images');
+                    
+                    data.images.forEach((img, index) => {
+                        console.log(`Image ${index}:`, img);
+                        
+                        const container = document.createElement('div');
+                        container.className = 'image-container';
+                        
+                        const image = document.createElement('img');
+                        const imageUrl = img.gallery || img.thumbnail || img.url || '';
+                        console.log(`Image ${index} URL:`, imageUrl);
+                        
+                        image.src = imageUrl;
+                        image.alt = img.filename || `Image ${index}`;
+                        image.onerror = () => {
+                            image.style.border = '2px solid red';
+                            console.error('Failed to load image:', imageUrl);
+                            image.alt = 'Failed: ' + imageUrl;
+                        };
+                        image.onload = () => {
+                            console.log('Successfully loaded:', imageUrl);
+                            image.style.border = '2px solid green';
+                        };
+                        
+                        const label = document.createElement('div');
+                        label.textContent = img.filename || 'Unknown';
+                        
+                        const urlLabel = document.createElement('div');
+                        urlLabel.textContent = imageUrl;
+                        urlLabel.style.fontSize = '10px';
+                        urlLabel.style.wordBreak = 'break-all';
+                        
+                        container.appendChild(image);
+                        container.appendChild(label);
+                        container.appendChild(urlLabel);
+                        imagesDiv.appendChild(container);
+                    });
+                } else {
+                    resultDiv.textContent += '\n\nNo images found!';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import { PhotoFormData, formHasExistingAiTextContent } from '.';
-import useAiImageQueries from '../ai/useAiImageQueries';
 
 export default function usePhotoFormParent({
   photoForm,
@@ -21,8 +20,6 @@ export default function usePhotoFormParent({
       );
     }, []);
 
-  const aiContent = useAiImageQueries(imageThumbnailBase64);
-
   return {
     pending,
     setIsPending,
@@ -30,6 +27,5 @@ export default function usePhotoFormParent({
     setUpdatedTitle,
     shouldConfirmAiTextGeneration,
     setShouldConfirmAiTextGeneration,
-    aiContent,
   };
 }
